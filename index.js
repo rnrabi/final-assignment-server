@@ -2,7 +2,7 @@ const express = require('express');
 const app = express()
 const cors = require('cors')
 require('dotenv').config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 // middle ware
 app.use(cors({
@@ -30,18 +30,30 @@ async function run() {
 
         const usersCollection = client.db('medicine').collection('users')
         const allMedicineCollection = client.db('medicine').collection('allMedicine')
+        const cartsCollection = client.db('medicine').collection('carts')
 
         app.get('/allMedicine', async (req, res) => {
             const result = await allMedicineCollection.find().toArray();
             res.send(result)
         })
 
-
+        app.get('/allMedicine/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await allMedicineCollection.findOne(query)
+            res.send(result)
+        })
 
 
         app.post('/users', async (req, res) => {
             const user = req.body;
             const result = await usersCollection.insertOne(user)
+            res.send(result)
+        })
+
+        app.post('/myCarts', async (req, res) => {
+            const cartInfo = req.body;
+            const result = await cartsCollection.insertOne(cartInfo)
             res.send(result)
         })
 

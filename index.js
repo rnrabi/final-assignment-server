@@ -44,6 +44,30 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/myCarts/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await cartsCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/users/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            let roll = 'user';
+
+            if (user) {
+                if (user.roll === 'admin') {
+                    roll = 'admin';
+                } else if (user.roll === 'seller') {
+                    roll = 'seller';
+                }
+            }
+
+            res.send({ roll });
+        })
+
 
         app.post('/users', async (req, res) => {
             const user = req.body;

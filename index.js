@@ -59,16 +59,18 @@ async function run() {
         app.get('/users/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
+            // console.log(query)
             const user = await usersCollection.findOne(query)
-            let roll;
+            // console.log(user)
+            let roll = 'User';
 
             if (user) {
-                if (user.roll === 'admin') {
+                if (user.roll === 'Admin') {
                     roll = 'admin';
-                } else if (user.roll === 'seller') {
+                } else if (user.roll === 'Seller') {
                     roll = 'seller';
                 }
-                else if (user.roll === 'user') {
+                else if (user.roll === 'User') {
                     roll = 'user'
                 }
             }
@@ -100,7 +102,14 @@ async function run() {
             const result = await cartsCollection.insertOne(cartInfo)
             res.send(result)
         })
-
+        // delete api 
+        app.delete('/allMedicine/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log(id)
+            const query = { _id: new ObjectId(id) }
+            const result = await allMedicineCollection.deleteOne(query)
+            res.send(result)
+        })
 
 
 

@@ -60,7 +60,7 @@ async function run() {
             const email = req.params.email;
             const query = { email: email }
             const user = await usersCollection.findOne(query)
-            let roll = 'user';
+            let roll;
 
             if (user) {
                 if (user.roll === 'admin') {
@@ -68,11 +68,26 @@ async function run() {
                 } else if (user.roll === 'seller') {
                     roll = 'seller';
                 }
+                else if (user.roll === 'user') {
+                    roll = 'user'
+                }
             }
 
             res.send({ roll });
         })
 
+        app.put('/user/:id', async (req, res) => {
+            const user = req.body;
+            const id = user.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    roll: user.roll
+                }
+            }
+            const result = await usersCollection.updateOne(filter, updateDoc)
+            res.send(result)
+        })
 
         app.post('/users', async (req, res) => {
             const user = req.body;

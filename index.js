@@ -102,6 +102,13 @@ async function run() {
             const result = await cartsCollection.insertOne(cartInfo)
             res.send(result)
         })
+
+        app.post('/allMedicine', async(req , res)=>{
+            const user = req.body;
+            const result = await allMedicineCollection.insertOne(user)
+            res.send(result)
+        })
+
         // delete api 
         app.delete('/allMedicine/:id', async (req, res) => {
             const id = req.params.id;

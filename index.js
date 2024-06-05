@@ -37,6 +37,14 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/specific/:category', async (req, res) => {
+            const { category } = req.params;
+            const query = { category: category }
+            console.log(query)
+            const result = await allMedicineCollection.find(query).toArray();
+            res.send(result)
+        })
+
         app.get('/allMedicine/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
@@ -103,7 +111,7 @@ async function run() {
             res.send(result)
         })
 
-        app.post('/allMedicine', async(req , res)=>{
+        app.post('/allMedicine', async (req, res) => {
             const user = req.body;
             const result = await allMedicineCollection.insertOne(user)
             res.send(result)

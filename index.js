@@ -31,6 +31,7 @@ async function run() {
         const usersCollection = client.db('medicine').collection('users')
         const allMedicineCollection = client.db('medicine').collection('allMedicine')
         const cartsCollection = client.db('medicine').collection('carts')
+        const advertiseCollection = client.db('medicine').collection('advertise')
 
         app.get('/allMedicine', async (req, res) => {
             const result = await allMedicineCollection.find().toArray();
@@ -49,6 +50,13 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await allMedicineCollection.findOne(query)
+            res.send(result)
+        })
+
+        app.get('/allMedi/:email', async (req, res) => {
+            const userEmail = req.params.email;
+            const query = { 'seller.email': userEmail }
+            const result = await allMedicineCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -114,6 +122,12 @@ async function run() {
         app.post('/allMedicine', async (req, res) => {
             const user = req.body;
             const result = await allMedicineCollection.insertOne(user)
+            res.send(result)
+        })
+
+        app.post('/advertise', async (req, res) => {
+            const advetisement = req.body;
+            const result = await advertiseCollection.insertOne(advetisement)
             res.send(result)
         })
 

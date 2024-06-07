@@ -67,6 +67,18 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/myAdvertise', async (req, res) => {
+            const result = await advertiseCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.get('/myAdvertise/:email', async (req, res) => {
+            const sellerEmail = req.params.email;
+            const query = { sellerEmail: sellerEmail }
+            const result = await advertiseCollection.find(query).toArray()
+            res.send(result)
+        })
+
         app.get('/allUsers', async (req, res) => {
             const result = await usersCollection.find().toArray()
             res.send(result)

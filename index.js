@@ -41,7 +41,7 @@ async function run() {
         app.get('/specific/:category', async (req, res) => {
             const { category } = req.params;
             const query = { category: category }
-            console.log(query)
+            // console.log(query)
             const result = await allMedicineCollection.find(query).toArray();
             res.send(result)
         })
@@ -57,6 +57,13 @@ async function run() {
             const userEmail = req.params.email;
             const query = { 'seller.email': userEmail }
             const result = await allMedicineCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/allImage', async (req, res) => {
+            const query = { 'admin.email': 'rabi@sabi.com' }
+            const adminAdded = await allMedicineCollection.find(query).toArray()
+            const result = adminAdded.map(admin=>admin.image)
             res.send(result)
         })
 

@@ -33,6 +33,7 @@ async function run() {
         const allMedicineCollection = client.db('medicine').collection('allMedicine')
         const cartsCollection = client.db('medicine').collection('carts')
         const advertiseCollection = client.db('medicine').collection('advertise')
+        const bookingCollection = client.db('medicine').collection('booking')
 
         app.get('/allMedicine', async (req, res) => {
             const result = await allMedicineCollection.find().toArray();
@@ -73,6 +74,14 @@ async function run() {
             const query = { email: email }
             const result = await cartsCollection.find(query).toArray()
             res.send(result)
+        })
+
+        app.get('/myCartsCheckout/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email }
+            const result = await cartsCollection.find(query).toArray()
+            const total = result.reduce((sum, item) => sum + item?.price, 0)
+            res.send({ total, products: result.length })
         })
 
         app.get('/myAdvertise', async (req, res) => {
@@ -124,7 +133,7 @@ async function run() {
         // payment intent**************
         app.post("/create-payment-intent", async (req, res) => {
             const { price } = req.body;
-            
+
             // const priceInCent = parseFloat(price) * 100;
             const priceInCents = Math.round(parseFloat(price) * 100);
             console.log(priceInCents)
@@ -142,6 +151,12 @@ async function run() {
                 clientSecret: paymentIntent.client_secret,
             });
         });
+
+        app.post('/booking', async (req, res) => {
+            const bookingInfo = req.body;
+            const result = await bookingCollection.insertOne(bookingInfo)
+            res.send(result)
+        })
 
 
         app.put('/user/:id', async (req, res) => {

@@ -2,6 +2,7 @@ const express = require('express');
 const app = express()
 const cors = require('cors')
 require('dotenv').config();
+const stripe = require("stripe")(`${process.env.Strip_api_key}`);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
 // middle ware
@@ -63,7 +64,7 @@ async function run() {
         app.get('/allImage', async (req, res) => {
             const query = { 'admin.email': 'rabi@sabi.com' }
             const adminAdded = await allMedicineCollection.find(query).toArray()
-            const result = adminAdded.map(admin=>admin.image)
+            const result = adminAdded.map(admin => admin.image)
             res.send(result)
         })
 
@@ -119,6 +120,29 @@ async function run() {
 
             res.send({ roll });
         })
+
+        // payment intent**************
+        app.post("/create-payment-intent", async (req, res) => {
+            const { price } = req.body;
+            
+            // const priceInCent = parseFloat(price) * 100;
+            const priceInCents = Math.round(parseFloat(price) * 100);
+            console.log(priceInCents)
+            // Create a PaymentIntent with the order amount and currency
+            const paymentIntent = await stripe.paymentIntents.create({
+                amount: 100,
+                currency: "usd",
+                // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+                automatic_payment_methods: {
+                    enabled: true,
+                },
+            });
+
+            res.send({
+                clientSecret: paymentIntent.client_secret,
+            });
+        });
+
 
         app.put('/user/:id', async (req, res) => {
             const user = req.body;

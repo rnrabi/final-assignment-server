@@ -135,10 +135,28 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/bookingSeller/:email', async (req, res) => {
+            const email = req.params.email;
+            console.log(email)
+            const allData = await bookingCollection.find().toArray()
+            const products = allData.flatMap(data =>
+                data.products.filter(product => product.seller && product.seller.email === email)
+            );
+            console.log(products)
+            res.send(products)
+        })
+
         app.get('/booking/:email', async (req, res) => {
             const customarEmail = req.params.email;
             const query = { 'customar.email': customarEmail }
             const result = await bookingCollection.find(query).toArray()
+            res.send(result)
+        })
+
+        app.get('/seller/:email', async (req, res) => {
+            const sellerEmail = req.params.email;
+            const query = { 'seller.email': sellerEmail }
+            const result = await cartsCollection.find(query).toArray()
             res.send(result)
         })
 
@@ -188,7 +206,7 @@ async function run() {
         app.post('/users', async (req, res) => {
             const user = req.body;
             const userEmail = user.email;
-            console.log(userEmail)
+            // console.log(userEmail)
             const query = { email: userEmail }
             const existingUser = await usersCollection.findOne(query)
             if (existingUser) {
@@ -200,6 +218,7 @@ async function run() {
 
         app.post('/myCarts', async (req, res) => {
             const cartInfo = req.body;
+            console.log(cartInfo)
             const result = await cartsCollection.insertOne(cartInfo)
             res.send(result)
         })
@@ -213,6 +232,18 @@ async function run() {
         app.post('/advertise', async (req, res) => {
             const advetisement = req.body;
             const result = await advertiseCollection.insertOne(advetisement)
+            res.send(result)
+        })
+
+        app.patch('/updateCartStatus/:email', async (req, res) => {
+            const email = req.params.email;
+            const filter = { 'buyer.email': email }
+            const updateDoc = {
+                $set: {
+                    status: 'paid'
+                }
+            }
+            const result = await cartsCollection.updateMany(filter, updateDoc)
             res.send(result)
         })
 

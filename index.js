@@ -34,6 +34,7 @@ async function run() {
         const cartsCollection = client.db('medicine').collection('carts')
         const advertiseCollection = client.db('medicine').collection('advertise')
         const bookingCollection = client.db('medicine').collection('booking')
+        const bannerCollection = client.db('medicine').collection('banner')
 
         app.get('/allMedicine', async (req, res) => {
             const result = await allMedicineCollection.find().toArray();
@@ -62,10 +63,17 @@ async function run() {
             res.send(result)
         })
 
+        // TODO :  advertise collection theke image url nite hobe , admin jkhon medicine add korbe seta allMedicine o advertisse a add kore dibo. 
         app.get('/allImage', async (req, res) => {
             const query = { 'admin.email': 'rabi@sabi.com' }
             const adminAdded = await allMedicineCollection.find(query).toArray()
             const result = adminAdded.map(admin => admin.image)
+            res.send(result)
+        })
+
+        // banner get api one
+        app.get('/banner', async (req, res) => {
+            const result = await bannerCollection.find().toArray()
             res.send(result)
         })
 
@@ -260,6 +268,33 @@ async function run() {
                 }
             }
             const result = await cartsCollection.updateMany(filter, updateDoc)
+            res.send(result)
+        })
+
+        // banner post api
+        app.put('/banner', async (req, res) => {
+            const bannerInfo = req.body;
+            const query = { image: bannerInfo.image }
+            const exist = await bannerCollection.findOne(query)
+            if (exist) {
+                return res.send({ exist: true })
+            }
+            const updateDoc = {
+                $set: {
+                    status: 'confirm'
+                }
+            }
+            const update = await advertiseCollection.updateOne(query, updateDoc)
+            const result = await bannerCollection.insertOne(bannerInfo)
+            res.send(result)
+        })
+
+        // banner delete api
+        app.delete('/banner', async (req, res) => {
+            const imageURL = req.query.image;
+            console.log(imageURL)
+            const query = { image: imageURL }
+            const result = await bannerCollection.deleteOne(query)
             res.send(result)
         })
 

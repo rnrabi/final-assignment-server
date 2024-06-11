@@ -69,6 +69,11 @@ async function run() {
             res.send(result)
         })
 
+        app.get('/carts', async (req, res) => {
+            const result = await cartsCollection.find().toArray()
+            res.send(result)
+        })
+
         app.get('/myCarts/:email', async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
@@ -133,6 +138,17 @@ async function run() {
         app.get('/booking', async (req, res) => {
             const result = await bookingCollection.find().toArray()
             res.send(result)
+        })
+
+        app.get('/bookingProducts', async (req, res) => {
+
+            const options = {
+                projection: { _id: 0, products: 1 },
+            };
+
+            const result = await bookingCollection.find({}, options).toArray()
+            const result1 = result.flatMap(data => data.products)
+            res.send(result1)
         })
 
         app.get('/bookingSeller/:email', async (req, res) => {

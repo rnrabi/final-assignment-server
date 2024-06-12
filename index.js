@@ -229,6 +229,18 @@ async function run() {
             res.send({ result, deleteCarts })
         })
 
+        app.put('/bookingUpdate/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const updateDoc = {
+                $set: {
+                    adminStatus: 'paid'
+                }
+            }
+            const result = await bookingCollection.updateOne(filter , updateDoc)
+            res.send(result)
+        })
+
 
         app.put('/user/:id', async (req, res) => {
             const user = req.body;

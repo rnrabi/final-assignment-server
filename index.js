@@ -148,6 +148,14 @@ async function run() {
             res.send(result)
         })
 
+        // here get transaction id
+        app.get('/booking/:customerEmail', async (req, res) => {
+            const customerEmail = req.params.customerEmail;
+            const query = { 'customar.email': customerEmail }
+            const result = await bookingCollection.find(query).toArray()
+            res.send(result)
+        })
+
         app.get('/bookingProducts', async (req, res) => {
 
             const options = {

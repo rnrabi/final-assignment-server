@@ -217,8 +217,16 @@ async function run() {
 
         app.post('/booking', async (req, res) => {
             const bookingInfo = req.body;
+            console.log(bookingInfo.cartId)
             const result = await bookingCollection.insertOne(bookingInfo)
-            res.send(result)
+            const query = {
+                _id: {
+                    $in: bookingInfo.cartId.map(id => new ObjectId(id))
+                }
+            }
+            const deleteCarts = await cartsCollection.deleteMany(query)
+
+            res.send({ result, deleteCarts })
         })
 
 

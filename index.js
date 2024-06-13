@@ -2,6 +2,7 @@ const express = require('express');
 const app = express()
 const cors = require('cors')
 require('dotenv').config();
+const jwt = require('jsonwebtoken')
 const stripe = require("stripe")(`${process.env.Strip_api_key}`);
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000;
@@ -36,6 +37,44 @@ async function run() {
         const bookingCollection = client.db('medicine').collection('booking')
         const bannerCollection = client.db('medicine').collection('banner')
 
+        // jwt api .......... 
+        app.post('/jwt', async (req, res) => {
+            const tokenInfo = req.body;
+            const token = jwt.sign(tokenInfo, `${process.env.Access_token_secret}`, { expiresIn: '2h' })
+            res.send({ token })
+        })
+
+        // verify token and middle ware
+        const verifyToken = async (req, res, next) => {
+            console.log('inside token is:',req.headers.authorization)
+            const token = req.headers.authorization?.split(' ')[1];
+            console.log(token)
+            if (!token) {
+                return res.status(401).send({ message: 'unauthorize access' })
+            }
+            jwt.verify(token, process.env.Access_token_secret, (err, decoded) => {
+                if (err) {
+                    return res.status(403).send({ message: 'forbidden access' })
+                }
+                req.user = decoded;
+                next()
+            })
+        }
+
+        // verify Admin ............ 
+        const verifyAdmin = async (req, res, next) => {
+            const email = req.user.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            const isAdmin = user?.roll === "Admin"
+            if (!isAdmin) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next()
+        }
+
+
+
         app.get('/allMedicine', async (req, res) => {
             const result = await allMedicineCollection.find().toArray();
             res.send(result)
@@ -63,7 +102,7 @@ async function run() {
             res.send(result)
         })
 
-        // TODO :  advertise collection theke image url nite hobe , admin jkhon medicine add korbe seta allMedicine o advertisse a add kore dibo. 
+
         app.get('/allImage', async (req, res) => {
             const query = { 'admin.email': 'rabi@sabi.com' }
             const adminAdded = await allMedicineCollection.find(query).toArray()
@@ -77,12 +116,12 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/carts', async (req, res) => {
+        app.get('/carts',verifyToken, async (req, res) => {
             const result = await cartsCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/myCarts/:email', async (req, res) => {
+        app.get('/myCarts/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const result = await cartsCollection.find(query).toArray()
@@ -192,6 +231,13 @@ async function run() {
             res.send(result)
         })
 
+        // discount api 
+        app.get('/discount', async (req, res) => {
+            const query = { discount: { $gt: 0 } }
+            const result = await allMedicineCollection.find(query).toArray();
+            res.send(result)
+        })
+
 
         // payment intent**************
         app.post("/create-payment-intent", async (req, res) => {
@@ -237,7 +283,7 @@ async function run() {
                     adminStatus: 'paid'
                 }
             }
-            const result = await bookingCollection.updateOne(filter , updateDoc)
+            const result = await bookingCollection.updateOne(filter, updateDoc)
             res.send(result)
         })
 

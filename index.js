@@ -73,6 +73,18 @@ async function run() {
             next()
         }
 
+        // verify Seller ............ 
+        const verifySeller = async (req, res, next) => {
+            const email = req.user.email;
+            const query = { email: email }
+            const user = await usersCollection.findOne(query)
+            const isSeller = user?.roll === "Seller"
+            if (!isSeller) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
+            next()
+        }
+
 
 
         app.get('/allMedicine', async (req, res) => {
@@ -95,7 +107,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/allMedi/:email', async (req, res) => {
+        app.get('/allMedi/:email', verifyToken, async (req, res) => {
             const userEmail = req.params.email;
             const query = { 'seller.email': userEmail }
             const result = await allMedicineCollection.find(query).toArray()
@@ -128,7 +140,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/myCartsCheckout/:email', async (req, res) => {
+        app.get('/myCartsCheckout/:email',verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const result = await cartsCollection.find(query).toArray()
@@ -136,24 +148,24 @@ async function run() {
             res.send({ total, products: result.length })
         })
 
-        app.get('/myAdvertise', async (req, res) => {
+        app.get('/myAdvertise',verifyToken , async (req, res) => {
             const result = await advertiseCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/myAdvertise/:email', async (req, res) => {
+        app.get('/myAdvertise/:email',verifyToken , verifySeller, async (req, res) => {
             const sellerEmail = req.params.email;
             const query = { sellerEmail: sellerEmail }
             const result = await advertiseCollection.find(query).toArray()
             res.send(result)
         })
 
-        app.get('/allUsers', async (req, res) => {
+        app.get('/allUsers', verifyToken , verifyAdmin, async (req, res) => {
             const result = await usersCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/user/:email', async (req, res) => {
+        app.get('/user/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email };
             const result = await usersCollection.findOne(query)

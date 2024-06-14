@@ -178,7 +178,7 @@ async function run() {
             // console.log(query)
             const user = await usersCollection.findOne(query)
             // console.log(user)
-            let roll = 'User';
+            let roll = 'user';
 
             if (user) {
                 if (user.roll === 'Admin') {

@@ -46,7 +46,7 @@ async function run() {
 
         // verify token and middle ware
         const verifyToken = async (req, res, next) => {
-            console.log('inside token is:',req.headers.authorization)
+            console.log('inside token is:', req.headers.authorization)
             const token = req.headers.authorization?.split(' ')[1];
             console.log(token)
             if (!token) {
@@ -128,7 +128,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/carts',verifyToken, async (req, res) => {
+        app.get('/carts', verifyToken, async (req, res) => {
             const result = await cartsCollection.find().toArray()
             res.send(result)
         })
@@ -140,7 +140,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get('/myCartsCheckout/:email',verifyToken, async (req, res) => {
+        app.get('/myCartsCheckout/:email', verifyToken, async (req, res) => {
             const email = req.params.email;
             const query = { email: email }
             const result = await cartsCollection.find(query).toArray()
@@ -148,19 +148,19 @@ async function run() {
             res.send({ total, products: result.length })
         })
 
-        app.get('/myAdvertise',verifyToken , async (req, res) => {
+        app.get('/myAdvertise', verifyToken, async (req, res) => {
             const result = await advertiseCollection.find().toArray()
             res.send(result)
         })
 
-        app.get('/myAdvertise/:email',verifyToken , verifySeller, async (req, res) => {
+        app.get('/myAdvertise/:email', verifyToken, verifySeller, async (req, res) => {
             const sellerEmail = req.params.email;
             const query = { sellerEmail: sellerEmail }
             const result = await advertiseCollection.find(query).toArray()
             res.send(result)
         })
 
-        app.get('/allUsers', verifyToken , verifyAdmin, async (req, res) => {
+        app.get('/allUsers', verifyToken, verifyAdmin, async (req, res) => {
             const result = await usersCollection.find().toArray()
             res.send(result)
         })
@@ -397,6 +397,13 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await cartsCollection.deleteOne(query);
+            res.send(result)
+        })
+
+        app.delete('/myAllCarts/:email', async (req, res) => {
+            const userEmail = req.params.email;
+            const query = { email: userEmail }
+            const result = await cartsCollection.deleteMany(query);
             res.send(result)
         })
 

@@ -46,9 +46,9 @@ async function run() {
 
         // verify token and middle ware
         const verifyToken = async (req, res, next) => {
-            console.log('inside token is:', req.headers.authorization)
+            // console.log('inside token is:', req.headers.authorization)
             const token = req.headers.authorization?.split(' ')[1];
-            console.log(token)
+            // console.log(token)
             if (!token) {
                 return res.status(401).send({ message: 'unauthorize access' })
             }
@@ -88,8 +88,16 @@ async function run() {
 
 
         app.get('/allMedicine', async (req, res) => {
-            const result = await allMedicineCollection.find().toArray();
+            const page = parseInt(req.query.page) - 1;
+            const size = parseInt(req.query.size);
+            console.log(page, size)
+            const result = await allMedicineCollection.find().skip(page * size).limit(size).toArray();
             res.send(result)
+        })
+
+        app.get('/allMedicine-count', async (req, res) => {
+            const count = await allMedicineCollection.countDocuments();
+            res.send({ count })
         })
 
         app.get('/specific/:category', async (req, res) => {
@@ -220,12 +228,12 @@ async function run() {
 
         app.get('/bookingSeller/:email', async (req, res) => {
             const email = req.params.email;
-            console.log(email)
+            // console.log(email)
             const allData = await bookingCollection.find().toArray()
             const products = allData.flatMap(data =>
                 data.products.filter(product => product.seller && product.seller.email === email)
             );
-            console.log(products)
+            // console.log(products)
             res.send(products)
         })
 
@@ -257,7 +265,7 @@ async function run() {
 
             // const priceInCent = parseFloat(price) * 100;
             const priceInCents = Math.round(parseFloat(price) * 100);
-            console.log(priceInCents)
+            // console.log(priceInCents)
             // Create a PaymentIntent with the order amount and currency
             const paymentIntent = await stripe.paymentIntents.create({
                 amount: priceInCents,
@@ -275,7 +283,7 @@ async function run() {
 
         app.post('/booking', async (req, res) => {
             const bookingInfo = req.body;
-            console.log(bookingInfo.cartId)
+            // console.log(bookingInfo.cartId)
             const result = await bookingCollection.insertOne(bookingInfo)
             const query = {
                 _id: {
@@ -328,7 +336,7 @@ async function run() {
 
         app.post('/myCarts', async (req, res) => {
             const cartInfo = req.body;
-            console.log(cartInfo)
+            // console.log(cartInfo)
             const result = await cartsCollection.insertOne(cartInfo)
             res.send(result)
         })
@@ -378,7 +386,7 @@ async function run() {
         // banner delete api
         app.delete('/banner', async (req, res) => {
             const imageURL = req.query.image;
-            console.log(imageURL)
+            // console.log(imageURL)
             const query = { image: imageURL }
             const result = await bannerCollection.deleteOne(query)
             res.send(result)
@@ -387,7 +395,7 @@ async function run() {
         // delete api 
         app.delete('/allMedicine/:id', async (req, res) => {
             const id = req.params.id;
-            console.log(id)
+            // console.log(id)
             const query = { _id: new ObjectId(id) }
             const result = await allMedicineCollection.deleteOne(query)
             res.send(result)

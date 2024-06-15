@@ -90,13 +90,31 @@ async function run() {
         app.get('/allMedicine', async (req, res) => {
             const page = parseInt(req.query.page) - 1;
             const size = parseInt(req.query.size);
-            console.log(page, size)
-            const result = await allMedicineCollection.find().skip(page * size).limit(size).toArray();
+            // console.log(page, size)
+            const sort = req.query.sort;
+            const search = req.query.search;
+
+            let query = {}
+            if (search) {
+                query = { name: { $regex: search, $options: 'i' } }
+            }
+
+            let option = {}
+            if (sort) {
+                option = { sort: { price: sort === 'asc' ? 1 : -1 } }
+            }
+
+            const result = await allMedicineCollection.find(query, option).skip(page * size).limit(size).toArray();
             res.send(result)
         })
 
         app.get('/allMedicine-count', async (req, res) => {
-            const count = await allMedicineCollection.countDocuments();
+            const search = req.query.search;
+            let query = {}
+            if (search) {
+                query = { name: { $regex: search, $options: 'i' } }
+            }
+            const count = await allMedicineCollection.countDocuments(query);
             res.send({ count })
         })
 
